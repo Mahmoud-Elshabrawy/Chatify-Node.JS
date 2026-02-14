@@ -1,6 +1,11 @@
 const express = require('express')
 const dotenv = require('dotenv')
+const dbConnection = require('./config/db')
+const mountRoutes = require('./routes')
 dotenv.config()
+
+
+dbConnection()
 
 
 
@@ -9,7 +14,12 @@ dotenv.config()
 
 const app = express()
 
-app.get('/', (req, res, next) => {res.send("hello")})
+app.use(express.json())
+
+
+
+// Mounted Rotues
+mountRoutes(app)
 
 const Port = process.env.PORT || 3000
 app.listen(Port, () => {
