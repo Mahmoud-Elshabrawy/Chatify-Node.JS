@@ -19,6 +19,10 @@ const UserSchema = new mongoose.Schema(
             required: [true, "password required"],
             minlength: [6, "Too short password"],
             trim: true,
+            select: false,
+        },
+        refreshToken: {
+            type: String
         },
     },
     {
@@ -33,6 +37,9 @@ UserSchema.pre('save', async function () {
     this.password = await bcrypt.hash(this.password, 12)
 })
 
+UserSchema.methods.correctPassword = async(candidate, hashed) => {
+    return await bcrypt.compare(candidate, hashed)
+}
 
 const User = mongoose.model('User', UserSchema)
 module.exports = User

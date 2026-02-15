@@ -2,6 +2,7 @@ const express = require('express')
 const dotenv = require('dotenv')
 const dbConnection = require('./config/db')
 const mountRoutes = require('./routes')
+const cookieParser = require('cookie-parser')
 dotenv.config()
 
 
@@ -15,7 +16,7 @@ dbConnection()
 const app = express()
 
 app.use(express.json())
-
+app.use(cookieParser())
 
 
 // Mounted Rotues

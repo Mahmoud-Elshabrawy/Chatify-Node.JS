@@ -1,4 +1,4 @@
-const authRoutes = require('./authRoutes.js');
+const authRoutes = require('./authRoutes');
 
 
 const mountRoutes = (app) => {
