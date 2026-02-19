@@ -7,15 +7,38 @@ const User = require('../models/userModel')
 
 
 exports.signUpValidator = [
-    check('name').notEmpty().withMessage('User name required'),
-    check('email').notEmpty().withMessage('email required').isEmail().withMessage("invalid email address").custom(async (val) => {
-        const emailExists = await User.findOne({ email: val })
-        if (emailExists) {
-            throw new Error(`this email address: ${val} already exists, please login`)
-        }
-    }),
+    check('name')
+        .notEmpty()
+        .withMessage('User name required'),
+    check('email')
+        .notEmpty()
+        .withMessage('email required')
+        .isEmail()
+        .withMessage("invalid email address")
+        .custom(async (val) => {
+                const emailExists = await User.findOne({ email: val })
+                if (emailExists) {
+                    throw new Error(`this email address: ${val} already exists, please login`)
+                }
+            }),
     check("password")
         .notEmpty()
-        .withMessage("password required").isLength({ min: 6 }).withMessage('password must be at least 6 characters')
+        .withMessage("password required").isLength({ min: 6 })
+        .withMessage('password must be at least 6 characters')
     , validators
 ]
+
+
+exports.logInValidator = [
+    check("email")
+        .notEmpty()
+        .withMessage("email required")
+        .isEmail()
+        .withMessage("invalid email address"),
+    check("password")
+        .notEmpty()
+        .withMessage("password required")
+        .isLength({ min: 6 })
+        .withMessage("password must be at least 6 characters"),
+    validators,
+];
