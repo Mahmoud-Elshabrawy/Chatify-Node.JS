@@ -4,6 +4,9 @@ const { generateAccessToken, generateRefreshToken } = require('../utils/generate
 const JWT = require('jsonwebtoken')
 const AppError = require('../utils/appError')
 const bcrypt = require('bcryptjs')
+const cloudinary = require('../utils/cloudinary')
+
+
 exports.signup = asyncHandler(async (req, res, next) => {
     const user = await User.create(req.body)
 
@@ -112,4 +115,39 @@ exports.protect = asyncHandler(async (req, res, next) => {
 
     req.user = user
     next()
+})
+
+
+exports.updateProfilePic = asyncHandler(async (req, res, next) => {
+    if (!req.file)
+        return next(new AppError('No image uploaded', 400))
+
+    const result = await new Promise((resolve, reject) => {
+        // console.log(cloudinary.config())
+
+        const stream = cloudinary.uploader.upload_stream(
+            { folder: 'chatify/users' },
+            (error, result) => {
+                if (error)
+                    return reject(error)
+                else
+                    return resolve(result)
+
+            }
+        )
+        stream.end(req.file.buffer)
+    })
+
+    const user = await User.findByIdAndUpdate(
+        req.user._id,
+        { profileImg: result.secure_url },
+        { new: true }
+    )
+
+    res.status(200).json({
+        status: 'success',
+        imageUrl: result.secure_url,
+        user
+    })
+
 })
