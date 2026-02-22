@@ -22,6 +22,7 @@ exports.signup = asyncHandler(async (req, res, next) => {
 
     res.status(201).json({
         status: 'success',
+        user,
         accessToken
     })
 })
@@ -54,6 +55,7 @@ exports.login = asyncHandler(async (req, res, next) => {
 
     res.status(200).json({
         status: 'success',
+        user,
         accessToken
     })
 })

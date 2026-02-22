@@ -6,6 +6,7 @@ const express = require('express')
 const dbConnection = require('./config/db')
 const mountRoutes = require('./routes')
 const cookieParser = require('cookie-parser')
+const AppError = require('./utils/appError')
 
 
 dbConnection()
@@ -23,6 +24,10 @@ app.use(cookieParser())
 
 // Mounted Rotues
 mountRoutes(app)
+
+app.use((req, res, next) => {
+    next(new AppError(`can\'t find this route : ${req.originalUrl}`, 404))
+})
 
 app.use((err, req, res, next) => {
     res.status(err.statusCode || 500).json({
