@@ -7,6 +7,7 @@ const dbConnection = require('./config/db')
 const mountRoutes = require('./routes')
 const cookieParser = require('cookie-parser')
 const AppError = require('./utils/appError')
+const { app, server } = require('./utils/socket')
 
 
 dbConnection()
@@ -16,7 +17,6 @@ dbConnection()
 
 
 
-const app = express()
 
 app.use(express.json())
 app.use(cookieParser())
@@ -38,6 +38,6 @@ app.use((err, req, res, next) => {
 
 
 const Port = process.env.PORT || 3000
-app.listen(Port, () => {
+server.listen(Port, () => {
     console.log(`App Running on port: ${Port}`);
 })

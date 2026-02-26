@@ -2,7 +2,7 @@ const asyncHandler = require('express-async-handler')
 const User = require('../models/userModel')
 const Message = require('../models/messageModel')
 const cloudinary = require('../utils/cloudinary')
-
+const { getReceiverSocketId, io } = require('../utils/socket')
 
 exports.getAllContacts = asyncHandler(async (req, res, next) => {
     // get all Contacts (get all users except the loggedin user)
@@ -14,26 +14,26 @@ exports.getAllContacts = asyncHandler(async (req, res, next) => {
 })
 
 // get only contacts that logged user chat with them
-exports.getChatParteners = asyncHandler(async(req, res, next) => {
+exports.getChatParteners = asyncHandler(async (req, res, next) => {
     const myId = req.user._id
 
     const messages = await Message.find({
         $or: [
-            {senderId: myId},
-            {receiverId: myId}
+            { senderId: myId },
+            { receiverId: myId }
         ]
     })
 
     let chatPartenersIds = []
     const check = messages.map((msg) => {
-        if(msg.senderId.toString() === myId.toString()) 
+        if (msg.senderId.toString() === myId.toString())
             chatPartenersIds.push(msg.receiverId.toString())
         else
             chatPartenersIds.push(msg.senderId.toString())
     })
     // console.log(chatPartenersIds)
 
-    const chatParteners = await User.find({_id: {$in: chatPartenersIds}}).select('-refreshToken')
+    const chatParteners = await User.find({ _id: { $in: chatPartenersIds } }).select('-refreshToken')
 
     res.status(200).json({
         status: 'success',
@@ -58,7 +58,7 @@ exports.getMessagesByUserId = asyncHandler(async (req, res, next) => {
                 { senderId: userId, receiverId: myId }
             ]
         }
-    ).sort({createdAt: 1})
+    ).sort({ createdAt: 1 })
 
 
     res.status(200).json({
@@ -100,6 +100,12 @@ exports.sendMessage = asyncHandler(async (req, res, next) => {
         text,
         image: imageUrl
     })
+
+    // send message in a real-time if the user is online
+    const receiverSocketId = getReceiverSocketId(userId)
+    if(receiverSocketId) {
+        io.to(receiverSocketId).emit('newMessage', newMessage)
+    }
 
     res.status(201).json({
         status: 'success',

@@ -18,6 +18,8 @@ const MessageSchema = new mongoose.Schema(
     { timestamps: true }
 )
 
+MessageSchema.index({ senderId: 1, receiverId: 1 })
+MessageSchema.index({ createdAt: 1 })
 
 
 const Message = mongoose.model('Message', MessageSchema)
