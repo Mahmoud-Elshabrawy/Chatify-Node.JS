@@ -2,7 +2,7 @@ const dotenv = require('dotenv')
 dotenv.config()
 
 
-const {Server} = require('socket.io')
+const { Server } = require('socket.io')
 const express = require('express')
 const http = require('http')
 const { socketAuth } = require('../middlewares/socket')
@@ -33,6 +33,25 @@ io.on('connection', (socket) => {
         delete (userSocketMap[userId])
         io.emit('getOnlineUsers', Object.keys(userSocketMap))
     })
+
+    // Typing Indicator 
+    socket.on('typing', (receivedId) => {
+        const receiverSocketId = getReceiverSocketId(receivedId)
+        if (receivedId) {
+            io.to(receiverSocketId).emit('typing', {
+                senderId: userId
+            })
+        }
+    })
+
+    socket.on('stopTyping', (receivedId) => {
+        const receiverSocketId = getReceiverSocketId(receivedId)
+         if (receivedId) {
+            io.to(receiverSocketId).emit('stopTyping', {
+                senderId: userId
+            })
+        }
+    })
 })
 
-module.exports =  {io, app, server, getReceiverSocketId}
+module.exports = { io, app, server, getReceiverSocketId }
