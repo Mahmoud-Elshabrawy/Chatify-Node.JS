@@ -2,7 +2,7 @@ const asyncHandler = require('express-async-handler')
 const User = require('../models/userModel')
 const Message = require('../models/messageModel')
 const cloudinary = require('../utils/cloudinary')
-const { getReceiverSocketId, io } = require('../utils/socket')
+const { getUserSocketId, io } = require('../utils/socket')
 
 exports.getAllContacts = asyncHandler(async (req, res, next) => {
     // get all Contacts (get all users except the loggedin user)
@@ -98,13 +98,16 @@ exports.sendMessage = asyncHandler(async (req, res, next) => {
         senderId: myId,
         receiverId: userId,
         text,
-        image: imageUrl
+        image: imageUrl,
+        status: 'sent'
     })
 
     // send message in a real-time if the user is online
-    const receiverSocketId = getReceiverSocketId(userId)
+    const receiverSocketId = getUserSocketId(userId)
     if(receiverSocketId) {
         io.to(receiverSocketId).emit('newMessage', newMessage)
+        newMessage.status = 'delivered'
+        await newMessage.save()
     }
 
     res.status(201).json({
